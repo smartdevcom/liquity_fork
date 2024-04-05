@@ -21,7 +21,10 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
 
   // --- Dependency setters ---
 
-  function setAddresses(address _sortedTrovesAddress, address _troveManagerAddress) external onlyOwner {
+  function setAddresses(
+    address _sortedTrovesAddress,
+    address _troveManagerAddress
+  ) external onlyOwner {
     checkContract(_sortedTrovesAddress);
     checkContract(_troveManagerAddress);
 
@@ -57,13 +60,19 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
     uint _LUSDamount,
     uint _price,
     uint _maxIterations
-  ) external view returns (address firstRedemptionHint, uint partialRedemptionHintNICR, uint truncatedLUSDamount) {
+  )
+    external
+    view
+    returns (address firstRedemptionHint, uint partialRedemptionHintNICR, uint truncatedLUSDamount)
+  {
     ISortedTroves sortedTrovesCached = sortedTroves;
 
     uint remainingLUSD = _LUSDamount;
     address currentTroveuser = sortedTrovesCached.getLast();
 
-    while (currentTroveuser != address(0) && troveManager.getCurrentICR(currentTroveuser, _price) < MCR) {
+    while (
+      currentTroveuser != address(0) && troveManager.getCurrentICR(currentTroveuser, _price) < MCR
+    ) {
       currentTroveuser = sortedTrovesCached.getPrev(currentTroveuser);
     }
 

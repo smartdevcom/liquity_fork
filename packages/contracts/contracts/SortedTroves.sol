@@ -112,7 +112,13 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
     _insert(troveManagerCached, _id, _NICR, _prevId, _nextId);
   }
 
-  function _insert(ITroveManager _troveManager, address _id, uint256 _NICR, address _prevId, address _nextId) internal {
+  function _insert(
+    ITroveManager _troveManager,
+    address _id,
+    uint256 _NICR,
+    address _prevId,
+    address _nextId
+  ) internal {
     // List must not be full
     require(!isFull(), "SortedTroves: List is full");
     // List must not already contain node
@@ -212,7 +218,12 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
    * @param _prevId Id of previous node for the new insert position
    * @param _nextId Id of next node for the new insert position
    */
-  function reInsert(address _id, uint256 _newNICR, address _prevId, address _nextId) external override {
+  function reInsert(
+    address _id,
+    uint256 _newNICR,
+    address _prevId,
+    address _nextId
+  ) external override {
     ITroveManager troveManagerCached = troveManager;
 
     _requireCallerIsBOorTroveM(troveManagerCached);
@@ -298,7 +309,11 @@ contract SortedTroves is Ownable, CheckContract, ISortedTroves {
    * @param _prevId Id of previous node for the insert position
    * @param _nextId Id of next node for the insert position
    */
-  function validInsertPosition(uint256 _NICR, address _prevId, address _nextId) external view override returns (bool) {
+  function validInsertPosition(
+    uint256 _NICR,
+    address _prevId,
+    address _nextId
+  ) external view override returns (bool) {
     return _validInsertPosition(troveManager, _NICR, _prevId, _nextId);
   }
 

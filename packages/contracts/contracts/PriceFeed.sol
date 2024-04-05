@@ -84,7 +84,10 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
   // --- Dependency setters ---
 
-  function setAddresses(address _priceAggregatorAddress, address _tellorCallerAddress) external onlyOwner {
+  function setAddresses(
+    address _priceAggregatorAddress,
+    address _tellorCallerAddress
+  ) external onlyOwner {
     checkContract(_priceAggregatorAddress);
     checkContract(_tellorCallerAddress);
 
@@ -102,7 +105,8 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     );
 
     require(
-      !_chainlinkIsBroken(chainlinkResponse, prevChainlinkResponse) && !_chainlinkIsFrozen(chainlinkResponse),
+      !_chainlinkIsBroken(chainlinkResponse, prevChainlinkResponse) &&
+        !_chainlinkIsFrozen(chainlinkResponse),
       "PriceFeed: Chainlink must be working and current"
     );
 
@@ -216,7 +220,13 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     // --- CASE 2: The system fetched last price from Tellor ---
     if (status == Status.usingTellorChainlinkUntrusted) {
       // If both Tellor and Chainlink are live, unbroken, and reporting similar prices, switch back to Chainlink
-      if (_bothOraclesLiveAndUnbrokenAndSimilarPrice(chainlinkResponse, prevChainlinkResponse, tellorResponse)) {
+      if (
+        _bothOraclesLiveAndUnbrokenAndSimilarPrice(
+          chainlinkResponse,
+          prevChainlinkResponse,
+          tellorResponse
+        )
+      ) {
         _changeStatus(Status.chainlinkWorking);
         return _storeChainlinkPrice(chainlinkResponse);
       }
@@ -244,7 +254,13 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
        * If both oracles are now live, unbroken and similar price, we assume that they are reporting
        * accurately, and so we switch back to Chainlink.
        */
-      if (_bothOraclesLiveAndUnbrokenAndSimilarPrice(chainlinkResponse, prevChainlinkResponse, tellorResponse)) {
+      if (
+        _bothOraclesLiveAndUnbrokenAndSimilarPrice(
+          chainlinkResponse,
+          prevChainlinkResponse,
+          tellorResponse
+        )
+      ) {
         _changeStatus(Status.chainlinkWorking);
         return _storeChainlinkPrice(chainlinkResponse);
       }
@@ -326,7 +342,13 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
       }
 
       // If Chainlink and Tellor are both live, unbroken and similar price, switch back to chainlinkWorking and return Chainlink price
-      if (_bothOraclesLiveAndUnbrokenAndSimilarPrice(chainlinkResponse, prevChainlinkResponse, tellorResponse)) {
+      if (
+        _bothOraclesLiveAndUnbrokenAndSimilarPrice(
+          chainlinkResponse,
+          prevChainlinkResponse,
+          tellorResponse
+        )
+      ) {
         _changeStatus(Status.chainlinkWorking);
         return _storeChainlinkPrice(chainlinkResponse);
       }
@@ -390,8 +412,14 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     ChainlinkResponse memory _currentResponse,
     ChainlinkResponse memory _prevResponse
   ) internal pure returns (bool) {
-    uint currentScaledPrice = _scaleChainlinkPriceByDigits(uint256(_currentResponse.answer), _currentResponse.decimals);
-    uint prevScaledPrice = _scaleChainlinkPriceByDigits(uint256(_prevResponse.answer), _prevResponse.decimals);
+    uint currentScaledPrice = _scaleChainlinkPriceByDigits(
+      uint256(_currentResponse.answer),
+      _currentResponse.decimals
+    );
+    uint prevScaledPrice = _scaleChainlinkPriceByDigits(
+      uint256(_prevResponse.answer),
+      _prevResponse.decimals
+    );
 
     uint minPrice = LiquityMath._min(currentScaledPrice, prevScaledPrice);
     uint maxPrice = LiquityMath._max(currentScaledPrice, prevScaledPrice);
@@ -468,7 +496,10 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     return percentPriceDifference <= MAX_PRICE_DIFFERENCE_BETWEEN_ORACLES;
   }
 
-  function _scaleChainlinkPriceByDigits(uint _price, uint _answerDigits) internal pure returns (uint) {
+  function _scaleChainlinkPriceByDigits(
+    uint _price,
+    uint _answerDigits
+  ) internal pure returns (uint) {
     /*
      * Convert the price returned by the Chainlink oracle to an 18-digit decimal for use by Liquity.
      * At date of Liquity launch, Chainlink uses an 8-digit price, but we also handle the possibility of
@@ -507,7 +538,9 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     return scaledTellorPrice;
   }
 
-  function _storeChainlinkPrice(ChainlinkResponse memory _chainlinkResponse) internal returns (uint) {
+  function _storeChainlinkPrice(
+    ChainlinkResponse memory _chainlinkResponse
+  ) internal returns (uint) {
     uint scaledChainlinkPrice = _scaleChainlinkPriceByDigits(
       uint256(_chainlinkResponse.answer),
       _chainlinkResponse.decimals
@@ -519,7 +552,11 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
 
   // --- Oracle response wrapper functions ---
 
-  function _getCurrentTellorResponse() internal view returns (TellorResponse memory tellorResponse) {
+  function _getCurrentTellorResponse()
+    internal
+    view
+    returns (TellorResponse memory tellorResponse)
+  {
     try tellorCaller.getTellorCurrentValue(ETHUSD_TELLOR_REQ_ID) returns (
       bool ifRetrieve,
       uint256 value,
@@ -538,7 +575,11 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     }
   }
 
-  function _getCurrentChainlinkResponse() internal view returns (ChainlinkResponse memory chainlinkResponse) {
+  function _getCurrentChainlinkResponse()
+    internal
+    view
+    returns (ChainlinkResponse memory chainlinkResponse)
+  {
     // First, try to get current decimal precision:
     try priceAggregator.decimals() returns (uint8 decimals) {
       // If call to Chainlink succeeds, record the current decimal precision

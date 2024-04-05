@@ -457,7 +457,11 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     emit StabilityPoolETHBalanceUpdated(ETH);
     emit EtherSent(msg.sender, depositorETHGain);
 
-    borrowerOperations.moveETHGainToTrove{ value: depositorETHGain }(msg.sender, _upperHint, _lowerHint);
+    borrowerOperations.moveETHGainToTrove{ value: depositorETHGain }(
+      msg.sender,
+      _upperHint,
+      _lowerHint
+    );
   }
 
   // --- LQTY issuance functions ---
@@ -482,12 +486,17 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     LQTYPerUnitStaked = _computeLQTYPerUnitStaked(_LQTYIssuance, totalLUSD);
 
     uint marginalLQTYGain = LQTYPerUnitStaked.mul(P);
-    epochToScaleToG[currentEpoch][currentScale] = epochToScaleToG[currentEpoch][currentScale].add(marginalLQTYGain);
+    epochToScaleToG[currentEpoch][currentScale] = epochToScaleToG[currentEpoch][currentScale].add(
+      marginalLQTYGain
+    );
 
     emit G_Updated(epochToScaleToG[currentEpoch][currentScale], currentEpoch, currentScale);
   }
 
-  function _computeLQTYPerUnitStaked(uint _LQTYIssuance, uint _totalLUSDDeposits) internal returns (uint) {
+  function _computeLQTYPerUnitStaked(
+    uint _LQTYIssuance,
+    uint _totalLUSDDeposits
+  ) internal returns (uint) {
     /*
      * Calculate the LQTY-per-unit staked.  Division uses a "feedback" error correction, to keep the
      * cumulative error low in the running total G:
@@ -565,7 +574,9 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
        * which ensures the error in any given compoundedLUSDDeposit favors the Stability Pool.
        */
       LUSDLossPerUnitStaked = (LUSDLossNumerator.div(_totalLUSDDeposits)).add(1);
-      lastLUSDLossError_Offset = (LUSDLossPerUnitStaked.mul(_totalLUSDDeposits)).sub(LUSDLossNumerator);
+      lastLUSDLossError_Offset = (LUSDLossPerUnitStaked.mul(_totalLUSDDeposits)).sub(
+        LUSDLossNumerator
+      );
     }
 
     ETHGainPerUnitStaked = ETHNumerator.div(_totalLUSDDeposits);
@@ -575,7 +586,10 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
   }
 
   // Update the Stability Pool reward sum S and product P
-  function _updateRewardSumAndProduct(uint _ETHGainPerUnitStaked, uint _LUSDLossPerUnitStaked) internal {
+  function _updateRewardSumAndProduct(
+    uint _ETHGainPerUnitStaked,
+    uint _LUSDLossPerUnitStaked
+  ) internal {
     uint currentP = P;
     uint newP;
 
@@ -664,7 +678,10 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     return ETHGain;
   }
 
-  function _getETHGainFromSnapshots(uint initialDeposit, Snapshots memory snapshots) internal view returns (uint) {
+  function _getETHGainFromSnapshots(
+    uint initialDeposit,
+    Snapshots memory snapshots
+  ) internal view returns (uint) {
     /*
      * Grab the sum 'S' from the epoch at which the stake was made. The ETH gain may span up to one scale change.
      * If it does, the second portion of the ETH gain is scaled by 1e9.
@@ -678,7 +695,9 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     uint firstPortion = epochToScaleToSum[epochSnapshot][scaleSnapshot].sub(S_Snapshot);
     uint secondPortion = epochToScaleToSum[epochSnapshot][scaleSnapshot.add(1)].div(SCALE_FACTOR);
 
-    uint ETHGain = initialDeposit.mul(firstPortion.add(secondPortion)).div(P_Snapshot).div(DECIMAL_PRECISION);
+    uint ETHGain = initialDeposit.mul(firstPortion.add(secondPortion)).div(P_Snapshot).div(
+      DECIMAL_PRECISION
+    );
 
     return ETHGain;
   }
@@ -702,11 +721,15 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
      * Otherwise, their cut of the deposit's earnings is equal to the kickbackRate, set by the front end through
      * which they made their deposit.
      */
-    uint kickbackRate = frontEndTag == address(0) ? DECIMAL_PRECISION : frontEnds[frontEndTag].kickbackRate;
+    uint kickbackRate = frontEndTag == address(0)
+      ? DECIMAL_PRECISION
+      : frontEnds[frontEndTag].kickbackRate;
 
     Snapshots memory snapshots = depositSnapshots[_depositor];
 
-    uint LQTYGain = kickbackRate.mul(_getLQTYGainFromSnapshots(initialDeposit, snapshots)).div(DECIMAL_PRECISION);
+    uint LQTYGain = kickbackRate.mul(_getLQTYGainFromSnapshots(initialDeposit, snapshots)).div(
+      DECIMAL_PRECISION
+    );
 
     return LQTYGain;
   }
@@ -728,11 +751,16 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
     Snapshots memory snapshots = frontEndSnapshots[_frontEnd];
 
-    uint LQTYGain = frontEndShare.mul(_getLQTYGainFromSnapshots(frontEndStake, snapshots)).div(DECIMAL_PRECISION);
+    uint LQTYGain = frontEndShare.mul(_getLQTYGainFromSnapshots(frontEndStake, snapshots)).div(
+      DECIMAL_PRECISION
+    );
     return LQTYGain;
   }
 
-  function _getLQTYGainFromSnapshots(uint initialStake, Snapshots memory snapshots) internal view returns (uint) {
+  function _getLQTYGainFromSnapshots(
+    uint initialStake,
+    Snapshots memory snapshots
+  ) internal view returns (uint) {
     /*
      * Grab the sum 'G' from the epoch at which the stake was made. The LQTY gain may span up to one scale change.
      * If it does, the second portion of the LQTY gain is scaled by 1e9.
@@ -746,7 +774,9 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     uint firstPortion = epochToScaleToG[epochSnapshot][scaleSnapshot].sub(G_Snapshot);
     uint secondPortion = epochToScaleToG[epochSnapshot][scaleSnapshot.add(1)].div(SCALE_FACTOR);
 
-    uint LQTYGain = initialStake.mul(firstPortion.add(secondPortion)).div(P_Snapshot).div(DECIMAL_PRECISION);
+    uint LQTYGain = initialStake.mul(firstPortion.add(secondPortion)).div(P_Snapshot).div(
+      DECIMAL_PRECISION
+    );
 
     return LQTYGain;
   }
@@ -940,7 +970,11 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     emit FrontEndSnapshotUpdated(_frontEnd, currentP, currentG);
   }
 
-  function _payOutLQTYGains(ICommunityIssuance _communityIssuance, address _depositor, address _frontEnd) internal {
+  function _payOutLQTYGains(
+    ICommunityIssuance _communityIssuance,
+    address _depositor,
+    address _frontEnd
+  ) internal {
     // Pay out front end's LQTY gain
     if (_frontEnd != address(0)) {
       uint frontEndLQTYGain = getFrontEndLQTYGain(_frontEnd);
@@ -997,7 +1031,10 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
   }
 
   function _requireFrontEndNotRegistered(address _address) internal view {
-    require(!frontEnds[_address].registered, "StabilityPool: must not already be a registered front end");
+    require(
+      !frontEnds[_address].registered,
+      "StabilityPool: must not already be a registered front end"
+    );
   }
 
   function _requireFrontEndIsRegisteredOrZero(address _address) internal view {
@@ -1008,7 +1045,10 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
   }
 
   function _requireValidKickbackRate(uint _kickbackRate) internal pure {
-    require(_kickbackRate <= DECIMAL_PRECISION, "StabilityPool: Kickback rate must be in range [0,1]");
+    require(
+      _kickbackRate <= DECIMAL_PRECISION,
+      "StabilityPool: Kickback rate must be in range [0,1]"
+    );
   }
 
   // --- Fallback function ---

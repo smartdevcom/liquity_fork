@@ -82,7 +82,12 @@ contract EchidnaProxy {
     borrowerOperations.withdrawColl(_amount, _upperHint, _lowerHint);
   }
 
-  function withdrawLUSDPrx(uint _amount, address _upperHint, address _lowerHint, uint _maxFee) external {
+  function withdrawLUSDPrx(
+    uint _amount,
+    address _upperHint,
+    address _lowerHint,
+    uint _maxFee
+  ) external {
     borrowerOperations.withdrawLUSD(_maxFee, _amount, _upperHint, _lowerHint);
   }
 
@@ -132,7 +137,11 @@ contract EchidnaProxy {
     return lusdToken.approve(spender, amount);
   }
 
-  function transferFromPrx(address sender, address recipient, uint256 amount) external returns (bool) {
+  function transferFromPrx(
+    address sender,
+    address recipient,
+    uint256 amount
+  ) external returns (bool) {
     return lusdToken.transferFrom(sender, recipient, amount);
   }
 

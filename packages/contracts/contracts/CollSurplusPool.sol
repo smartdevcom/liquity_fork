@@ -92,7 +92,10 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
   // --- 'require' functions ---
 
   function _requireCallerIsBorrowerOperations() internal view {
-    require(msg.sender == borrowerOperationsAddress, "CollSurplusPool: Caller is not Borrower Operations");
+    require(
+      msg.sender == borrowerOperationsAddress,
+      "CollSurplusPool: Caller is not Borrower Operations"
+    );
   }
 
   function _requireCallerIsTroveManager() internal view {

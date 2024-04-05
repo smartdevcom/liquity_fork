@@ -82,7 +82,9 @@ contract MultiTroveGetter {
         ,
 
       ) = troveManager.Troves(currentTroveowner);
-      (_troves[idx].snapshotETH, _troves[idx].snapshotLUSDDebt) = troveManager.rewardSnapshots(currentTroveowner);
+      (_troves[idx].snapshotETH, _troves[idx].snapshotLUSDDebt) = troveManager.rewardSnapshots(
+        currentTroveowner
+      );
 
       currentTroveowner = sortedTroves.getNext(currentTroveowner);
     }
@@ -111,7 +113,9 @@ contract MultiTroveGetter {
         ,
 
       ) = troveManager.Troves(currentTroveowner);
-      (_troves[idx].snapshotETH, _troves[idx].snapshotLUSDDebt) = troveManager.rewardSnapshots(currentTroveowner);
+      (_troves[idx].snapshotETH, _troves[idx].snapshotLUSDDebt) = troveManager.rewardSnapshots(
+        currentTroveowner
+      );
 
       currentTroveowner = sortedTroves.getPrev(currentTroveowner);
     }
